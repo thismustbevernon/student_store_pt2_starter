@@ -1,21 +1,13 @@
-const db = require("../db")
+const db = require('../db');
 
-
-class Store {
-    static async listProducts(){
-
-        // return (SELECT * FROM products)
-
-        const result = await db.query(`SELECT  * FROM products;`)
-        const products = result.rows
-        return products
-
-    }
+class Order {
+  static async listProducts() {
+    const query = `
+      SELECT * FROM products
+    `;
+    const result = await db.query(query);
+    return result.rows;
+  }
 }
 
-
-
-
-
-
-module.exports= Store
+module.exports = Order;

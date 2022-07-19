@@ -1,38 +1,26 @@
-const express = require("express")
-const { listOrderForUser, createOrder } = require("../models/order")
-const Order = require("../models/Order")
-const router = express.Router()
+const express = require('express');
+const router = express.Router();
+const Order = require('../models/orders');
+const User = require('../models/user');
+const { requireAuthenticatedUser } = require('../middleware/security');
+const { BadRequestError } = require('../utils/errors');
 
-router.get('/', async (req,res,next)=>{
-    try{
+router.get('/', requireAuthenticatedUser, async (req, res) => {
+  const { email } = res.locals.user;
+  const user = await User.fetchUserByEmail(email);
+  const orders = await Order.listOrdersForUser(user.id);
+  res.status(200).json({ orders });
+});
 
-        listOrderForUser()
+router.post('/', requireAuthenticatedUser, async (req, res) => {
+  if (!req.body?.order) {
+    throw new BadRequestError('Missing order');
+  }
+  console.log(req.body);
+  const { email } = res.locals.user;
+  const user = await User.fetchUserByEmail(email);
+  const order = await Order.createOrder(user, req.body.order);
+  res.status(201).json({ order });
+});
 
-        const listOrderForUser = await Order.listOrderForUser(req.body)
-        return res.status(200).json({listOrderForUser})
-
-
- 
-
-    }catch(err){
-        next(err)
-    }
-})
-
-
-
-router.post('/', async (req,res,next)=>{
-    try{
-   
-        const createOrder = await Order.createOrder(req.body)
-        return res.status(200).json({createOrder})
-
-    }catch(err){
-        next(err)
-    }
-})
-
-
-
-
-module.exports = router
+module.exports = router;
